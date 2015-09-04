@@ -97,3 +97,83 @@ def p14(num):
     tmp = [v for _,v in results.iteritems()]
     print "%d ms" % ((time.time() - start) * 1000)
     return numpy.argmax(tmp)+1
+
+def p15(exp):
+    tmp = str(pow(2,exp))
+    val = 0
+    for k in tmp:
+        val += int(k)
+    return k
+
+ones = ['', 'one','two','three','four','five','six','seven','eight','nine']
+tens1 = ['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen']
+tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety']
+hundreds = map(lambda x: x+' hundred', ones)
+thousands = map(lambda x: x+ ' thousand', ones)
+
+def p16h(i):
+    t = i / 1000
+    h = (i-1000*t) / 100
+    te= (i-1000*t-100*h) / 10
+    tw= (i-1000*t-100*h) / 20
+    o = i - 1000*t - 100*h - 10*te
+
+    tmp = []
+
+    if (t > 0):
+        tmp.append(thousands[t])
+    if (h > 0):
+        tmp.append(hundreds[h])
+    if (te==1):
+        tmp.append(tens1[o])
+    if (te==0) or (te>=2):
+        val = tens[te]
+        if (o>0):
+            val += ones[o]
+        tmp.append(val)
+    out = " and ".join(tmp)
+    if out[-5:]==" and ":
+        out = out[0:-5]
+    return out
+
+def p16(a,b):
+    val = 0
+    for i in range(a, b+1):
+        val += len(p16h(i).replace(' ', ''))
+    return val
+
+
+class TriDigit():
+    def __init__(self, val):
+        self.val = val
+        self.children = set([])
+        self.best = None
+    def addchild(self, child):
+        self.children.add(child)
+    def addchildren(self, children):
+        for k in children:
+            self.addchild(k)
+    def bestsum(self):
+        if (self.best):
+            return self.best
+        if len(self.children) == 0:
+            out = self.val
+        else:
+            out = self.val + max(map(lambda x: x.bestsum(), self.children))
+
+        self.best = out
+        return out
+    def __repr__(self):
+        return "TriDigit Val: %d" % self.val
+
+def p17(filename):
+    f = open(filename)
+    lines = f.readlines()
+    f.close()
+    digs = map(lambda x: map(lambda y: TriDigit(int(y)), x.strip().split(' ')), lines)
+    numrows = len(digs)
+    for i in range(0, numrows-1):
+        for j in range(0,i+1):
+            #ipdb.set_trace()
+            digs[i][j].addchildren([digs[i+1][j], digs[i+1][j+1]])
+    return digs[0][0].bestsum()
