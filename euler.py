@@ -56,8 +56,8 @@ def triangle(n):
         i+=1
 
 def factors(n):
-    return set(reduce(list.__add__,
-                ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
+    return list(set(reduce(list.__add__,
+                ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0))))
 def p12():
     MAX = 2e32
     for k in triangle(MAX):
@@ -177,3 +177,68 @@ def p17(filename):
             #ipdb.set_trace()
             digs[i][j].addchildren([digs[i+1][j], digs[i+1][j+1]])
     return digs[0][0].bestsum()
+
+days = ['Sun','Mon','Tues','Wed','Thurs','Fri','Sat']
+mdays = {1:31,3:31,4:30,5:31,6:30,7:31,8:31,9:30,10:31,11:30,12:31}
+
+class Date():
+    def __init__(self, day, month, year, dow):
+        self.day = day
+        self.month = month
+        self.year = year
+        self.dow = dow
+    def __repr__(self):
+        return self.dow + ' %d/%d/%d' % (self.day, self.month, self.year)
+
+def nextDay(date):
+    leap = ((date.year % 4 == 0) and (date.year % 100 != 0)) or (date.year % 400 == 0)
+    daysInMonth = mdays[date.month] if date.month != 2 else 29 if leap else 28
+    if date.day != daysInMonth:
+        day = date.day + 1
+        month = date.month
+    else:
+        day = 1
+        month = date.month + 1
+    if month > 12:
+        month = 1; year = date.year+1
+    else:
+        year = date.year
+    dow = days[(days.index(date.dow) + 1)%7]
+    return Date(day,month,year,dow)
+
+def genCal(first, days):
+    cal = [first]
+    last = first
+    i = 0
+    while i < days:
+        d = nextDay(last)
+        cal.append(d)
+        i += 1
+        last = d
+    return cal
+
+def p18():
+    d = Date(1,1,1900, 'Mon')
+    dates = filter(lambda x: x.year > 1900 and x.year < 2001, genCal(d, 50000))
+    return sum(map(lambda x: 1 if (x.day == 1) and (x.dow == 'Sun') else 0, dates))
+
+def p19(n):
+    num = str(math.factorial(n))
+    s = 0
+    for digit in num:
+        s += int(digit)
+    return s
+
+def p20d(n):
+    return sum(factors(n))-n
+
+def p20(n):
+    tmp = {}
+    for i in range(1,n):
+        tmp[i] = p20d(i)
+
+    nums = []
+    for k,v in tmp.iteritems():
+        if tmp.has_key(v) and tmp[v] == k and k != v:
+            nums.append(k)
+    return sum(nums)
